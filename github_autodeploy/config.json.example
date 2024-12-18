@@ -1,0 +1,15 @@
+{
+  "Vesek/test": {
+    "push": {
+      "secret": "very_secret_phrase_vesek",
+      "work_dir": "/srv/server",
+      "run": "/home/user/test.sh"
+    }
+  },
+  "User/example": {
+    "ping": {
+      "secret": "very_secret_phrase",
+      "run": "/home/user/test.sh"
+    }
+  }
+}
