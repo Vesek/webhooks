@@ -1,0 +1,25 @@
+{
+  "max_queue_length": 10,
+  "repos": {
+    "Vesek/test": {
+      "secret": "very_secret_phrase_vesek",
+      "events": {
+        "push": {
+          "work_dir": "/srv/server",
+          "run": "/home/user/test.sh"
+        },
+        "ping": {
+          "run": "/home/user/test_ping.sh"
+        }
+      }
+    },
+    "User/example": {
+      "secret": "very_secret_phrase",
+      "events": {
+        "ping": {
+          "run": "/home/user/test.sh"
+        }
+      }
+    }
+  }
+}

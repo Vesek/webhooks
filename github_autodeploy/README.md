@@ -15,4 +15,5 @@ Running as non-root is highly recommended.
 
 # TODO:
 - [X] Check if config.json is in a valid format and if working dir and script actually exist
-- [ ] Implement a QUEUE so repeated reqests don't collide
+- [X] Implement a QUEUE so repeated reqests don't collide
+- [ ] Implement a timeout for repos to avoid spam and a log file for violations

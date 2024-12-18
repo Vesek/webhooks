@@ -1,36 +1,22 @@
 from typing import Annotated
 from fastapi import FastAPI, Response, Header, Request, Body
-from models import ConfigModel, RepositoryModel
-from os import path
+from models import Config, Repository
 from pydantic_core._pydantic_core import ValidationError
-import json
-import hashlib
-import hmac
-import subprocess
+from task_handler import TaskHandler, Task
+from asyncio import QueueFull
+from os import path
+from util import verify_signature
 
+# Check if config exists, load it, and check validity
 try:
     with open(path.join(path.dirname(__file__), "config.json")) as f:
-        config = ConfigModel(json.load(f))
+        config = Config.model_validate_json(f.read())
 except FileNotFoundError:
     raise SystemExit('ERROR: Config not found')
 except ValidationError:
     raise SystemExit('ERROR: Invalid config - refer to config.json.example')
 
-
-def verify_signature(payload_body, secret_token, signature_header):
-    '''
-    Webhook signature verification from GitHub docs:
-        https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#python-example
-    Modified for use here
-    '''
-    if not signature_header:
-        return False
-    hash_object = hmac.new(secret_token.encode('utf-8'), msg=payload_body, digestmod=hashlib.sha256)
-    expected_signature = "sha256=" + hash_object.hexdigest()
-    if not hmac.compare_digest(expected_signature, signature_header):
-        return False
-    else:
-        return True
+taskhandler = TaskHandler(config.max_queue_length)
 
 app = FastAPI(root_path="/autodeploy") # Root path isn't "/" because of use behind a reverse proxy
 
@@ -47,22 +33,25 @@ async def write_root(
     request: Request, # Raw request so it can be hashed tohether with the "secret"
     X_Hub_Signature_256: Annotated[str, Header(description="HMAC-SHA256 with your secret as the key")],
     X_GitHub_Event: Annotated[str, Header(description="Event type e.g. 'push'")],
-    repository: Annotated[RepositoryModel, Body(embed=True)] # Repository info for searching in config
+    repository: Annotated[Repository, Body(embed=True)] # Repository info for searching in config
 ):
     '''
     Post request handler for root, checks if everyhing is valid and
     '''
-    if repository.full_name in config:
+    if repository.full_name in config.repos:
 
-        if X_GitHub_Event in config[repository.full_name]:
-            secret = config[repository.full_name][X_GitHub_Event].secret
+        if X_GitHub_Event in config.repos[repository.full_name].events:
+            secret = config.repos[repository.full_name].secret
 
             if verify_signature(await request.body(), secret, X_Hub_Signature_256):
-                event_config = config[repository.full_name][X_GitHub_Event]
-                subprocess.Popen([event_config.run], cwd=event_config.work_dir, shell=True)
+                task = config.repos[repository.full_name].events[X_GitHub_Event]
                 status_code = 200
-                message = "OK"
-
+                message = "Task added to queue"
+                try:
+                    taskhandler.queue.put_nowait(task)
+                except QueueFull:
+                    status_code = 400
+                    message = "Task queue is full"
             else:
                 status_code = 403
                 message="Hash does not match or invalid - violation reported"

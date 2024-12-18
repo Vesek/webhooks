@@ -1,29 +1,31 @@
-from pydantic import BaseModel, RootModel, FilePath, DirectoryPath
+from pydantic import BaseModel, FilePath, DirectoryPath, model_validator
 
 # Config model
-class EventConfig(BaseModel):
-    secret: str
-    work_dir: DirectoryPath | None = None
+class Task(BaseModel):
+    """
+    Represents a task, specifying the script's execution details.
+
+    Attributes:
+        run (FilePath): The script or command to be executed.
+        work_dir (DirectoryPath | None): The working directory for the task.
+    """
     run: FilePath
+    work_dir: DirectoryPath | None = None
 
-class RepositoryEvent(RootModel):
-    root: dict[str, EventConfig]
+    @model_validator(mode='after')
+    def check_dirname(self):
+        if self.work_dir is None:
+            self.work_dir = self.run.parent
+        return self
 
-    def __iter__(self):
-        return iter(self.root)
+class ConfigRepo(BaseModel):
+    secret: str
+    events: dict[str, Task]
 
-    def __getitem__(self, item):
-        return self.root[item]
-
-class ConfigModel(RootModel):
-    root: dict[str, RepositoryEvent]
-
-    def __iter__(self):
-        return iter(self.root)
-
-    def __getitem__(self, item):
-        return self.root[item]
+class Config(BaseModel):
+    repos: dict[str, ConfigRepo]
+    max_queue_length: int = 0
 
 # Repository model
-class RepositoryModel(BaseModel):
+class Repository(BaseModel):
     full_name: str
