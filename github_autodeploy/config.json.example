@@ -4,6 +4,10 @@
       "secret": "very_secret_phrase_vesek",
       "work_dir": "/srv/server",
       "run": "/home/user/test.sh"
+    },
+    "ping": {
+      "secret": "very_secret_phrase_vesek",
+      "run": "/home/user/test_ping.sh"
     }
   },
   "User/example": {

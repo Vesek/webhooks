@@ -1,0 +1,10 @@
+[Unit]
+Description=FastAPI Autodeploy webhook handler
+After=network.target
+
+[Service]
+ExecStart=<PATH TO THIS DIRECTORY>/start.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
