@@ -9,7 +9,7 @@ an example is available in the `config.json.example` file
 To start you can use the `start.sh` script. It creates a python environment and install the dependencies in it, then starts the server.
 
 If you want to run this in the background you can use the `webhook-github-autodeploy.service` file and run it using systemd.
-Before installing this service file you need to first edit it so the `ExecStart` path points to the `start.sh` script.
+Before installing this service file you need to first edit it so the `WorkingDirectory` path points here.
 
 Running as non-root is highly recommended.
 

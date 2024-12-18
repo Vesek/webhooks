@@ -3,7 +3,8 @@ Description=FastAPI Autodeploy webhook handler
 After=network.target
 
 [Service]
-ExecStart=<PATH TO THIS DIRECTORY>/start.sh
+WorkingDirectory=<PATH TO THIS DIRECTORY>
+ExecStart=/bin/bash -c "./start.sh"
 Restart=always
 
 [Install]
