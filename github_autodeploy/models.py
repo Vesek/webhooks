@@ -1,10 +1,10 @@
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, RootModel, FilePath, DirectoryPath
 
 # Config model
 class EventConfig(BaseModel):
     secret: str
-    work_dir: str | None = None
-    run: str
+    work_dir: DirectoryPath | None = None
+    run: FilePath
 
 class RepositoryEvent(RootModel):
     root: dict[str, EventConfig]

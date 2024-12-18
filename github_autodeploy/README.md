@@ -14,5 +14,5 @@ Before installing this service file you need to first edit it so the `WorkingDir
 Running as non-root is highly recommended.
 
 # TODO:
-- [ ] Check if config.json is in a valid format and if working dir and script actually exist
+- [X] Check if config.json is in a valid format and if working dir and script actually exist
 - [ ] Implement a QUEUE so repeated reqests don't collide
