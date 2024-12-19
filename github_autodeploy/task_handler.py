@@ -1,4 +1,3 @@
-from pydantic import FilePath, DirectoryPath
 from models import Script
 import asyncio
 import logging
