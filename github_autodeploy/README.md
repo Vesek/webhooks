@@ -16,6 +16,8 @@ Running as non-root is highly recommended.
 # TODO:
 - [X] Check if config.json is in a valid format and if working dir and script actually exist
 - [X] Implement a QUEUE so repeated reqests don't collide
-- [ ] Implement a timeout for repos to avoid spam and a log file for violations
+- [X] Add a log file
 - [ ] Implement a branch check
 - [ ] Rewrite task_handler to be multithreaded instead of async
+- [ ] Add more comments and write a better README
+- [ ] (Is it really necessary?) Implement a timeout for repos to avoid spam
