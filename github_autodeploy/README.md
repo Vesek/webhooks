@@ -14,8 +14,8 @@ To start you can use the `start.sh` script. It creates a python environment and 
 If you want to run this in the background you can use the `webhook-github-autodeploy.service` file and run it using systemd.
 
 Before installing the service file you need to fill in the `User`, `WorkingDirectory` and `ReadWritePaths` lines.
-This can be done automatically with the `service-smudge.sh` script, but you should check it before installation anyway.
-You can try to revert the automatic fill by running the `service-clean.sh` but it can have it's problems (e.g. when you move the repository's directory).
+This can be done automatically by piping it into the `service-smudge.sh` script, but you should check it before installation anyway.
+You can try to revert this with the `service-clean.sh` but it can have it's problems (e.g. when you move the repository's directory).
 
 Running as non-root is highly recommended.
 
