@@ -60,37 +60,46 @@ async def write_root(
     '''
     Post request handler for root, checks if everyhing is valid and
     '''
-    if repository.full_name in config.repos:
 
-        if headers.X_GitHub_Event in config.repos[repository.full_name].events:
-            secret = config.repos[repository.full_name].secret
-
-            if verify_signature(await request.body(), secret, headers.X_Hub_Signature_256):
-                task = config.repos[repository.full_name].events[headers.X_GitHub_Event]
-                uuid = headers.X_GitHub_Delivery
-                log_level = logging.INFO
-                status_code = 200
-                message = f"Task '{uuid}' added to queue"
-                try:
-                    taskhandler.queue.put_nowait(Task(task, uuid))
-                except QueueFull:
-                    log_level = logging.ERROR
-                    status_code = 400
-                    message = "Task queue is full"
-            else:
-                log_level = logging.WARN
-                status_code = 403
-                message="Hash does not match or invalid - violation reported"
-
-        else:
-            log_level = logging.DEBUG
-            status_code = 400
-            message = f"X-GitHub-Event: {headers.X_GitHub_Event}\nEvent type with undefined behavior"
-
-    else:
-        log_level = logging.DEBUG
+    # Check if repository has a defined configuration
+    if repository.full_name not in config.repos:
         status_code = 400
         message = f"repository: {{full_name}}: {repository.full_name}\nRepository name with undefined behavior"
+
+        logger.debug(f"Response: {status_code} - {message}")
+        return Response(content=message, status_code=status_code, media_type="text/plain")
+
+    repo_config = config.repos[repository.full_name]
+
+    # Check if event has a defined configuration for repo
+    if headers.X_GitHub_Event not in repo_config.events:
+        status_code = 400
+        message = f"X-GitHub-Event: {headers.X_GitHub_Event}\nEvent type with undefined behavior"
+
+        logger.debug(f"Response: {status_code} - {message}")
+        return Response(content=message, status_code=status_code, media_type="text/plain")
+
+    # Check if request signature matches config
+    if not verify_signature(await request.body(), repo_config.secret, headers.X_Hub_Signature_256):
+        status_code = 403
+        message="Hash does not match or invalid - violation reported"
+
+        logger.warn(f"Response: {status_code} - {message}")
+        return Response(content=message, status_code=status_code, media_type="text/plain")
+
+    task = repo_config.events[headers.X_GitHub_Event]
+    uuid = headers.X_GitHub_Delivery
+
+    # Try to add the task to the queue
+    try:
+        taskhandler.queue.put_nowait(Task(task, uuid))
+        log_level = logging.INFO
+        status_code = 200
+        message = f"Task '{uuid}' added to queue"
+    except QueueFull:
+        log_level = logging.ERROR
+        status_code = 400
+        message = "Task queue is full"
 
     logger.log(log_level, f"Response: {status_code} - {message}")
     return Response(content=message, status_code=status_code, media_type="text/plain")
