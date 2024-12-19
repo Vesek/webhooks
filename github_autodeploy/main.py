@@ -17,8 +17,8 @@ try:
         config = Config.model_validate_json(f.read())
 except FileNotFoundError:
     raise SystemExit('ERROR: Config not found')
-except ValidationError:
-    raise SystemExit('ERROR: Invalid config - refer to config.json.example')
+except ValidationError as e:
+    raise SystemExit(f'{e}\n\nERROR: Invalid config - refer to config.json.example')
 
 
 # Setup logging
