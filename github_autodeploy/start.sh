@@ -17,8 +17,8 @@ source "$ENV_DIR/bin/activate"
 
 # Check if requirements file exists and install dependencies
 if [ -f "$REQUIREMENTS_FILE" ]; then
-    echo "Installing dependencies from $REQUIREMENTS_FILE..."
-    pip install -r "$REQUIREMENTS_FILE"
+    echo "Installing/checking dependencies from $REQUIREMENTS_FILE..."
+    pip install -r "$REQUIREMENTS_FILE" > /dev/null
 else
     echo "Requirements file $REQUIREMENTS_FILE not found. Skipping dependency installation."
 fi
