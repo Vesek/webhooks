@@ -5,14 +5,15 @@ from pydantic_core._pydantic_core import ValidationError
 from task_handler import TaskHandler, Task
 from asyncio import QueueFull
 from logging.handlers import RotatingFileHandler
-from os import path
+from pathlib import Path
 from util import verify_signature
 import logging
 
+workdir = Path(__file__).parent
 
 # Check if config exists, load it, and check validity
 try:
-    with open(path.join(path.dirname(__file__), "config.json")) as f:
+    with open(workdir / "config.json") as f:
         config = Config.model_validate_json(f.read())
 except FileNotFoundError:
     raise SystemExit('ERROR: Config not found')
@@ -25,9 +26,13 @@ log_level = logging.INFO
 max_log_file_size = 5 * 1024 * 1024  # 5 MB
 backup_count = 1
 
+# Create log directory if it doesn't exist already
+logdir = workdir / "log"
+logdir.mkdir(exist_ok = True)
+
 # Log file will probably never be too big, but just to be sure
 rotating_handler = RotatingFileHandler(
-    "autodeploy.log", maxBytes=max_log_file_size, backupCount=backup_count
+    logdir / "autodeploy.log", maxBytes=max_log_file_size, backupCount=backup_count
 )
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
