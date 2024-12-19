@@ -97,7 +97,8 @@ async def write_root(
     script = repo_config.events[headers.X_GitHub_Event]
     uuid = headers.X_GitHub_Delivery
 
-    if payload.ref not in script.refs:
+
+    if script.refs is None or (payload.ref not in script.refs):
         status_code = 200
         message = f"Ref '{payload.ref}' not associated with '{headers.X_GitHub_Event}' event task"
 
