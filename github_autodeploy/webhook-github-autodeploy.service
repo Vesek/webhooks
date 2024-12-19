@@ -3,9 +3,14 @@ Description=FastAPI Autodeploy webhook handler
 After=network.target
 
 [Service]
-WorkingDirectory=<PATH TO THIS DIRECTORY>
+User=<USER>
+WorkingDirectory=<PWD>
 ExecStart=/bin/bash -c "./start.sh"
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=<PWD>/log
 Restart=always
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
