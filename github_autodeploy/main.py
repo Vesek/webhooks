@@ -71,7 +71,7 @@ async def write_root(
     # Check if repository has a defined configuration
     if repo_name not in config.repos:
         status_code = 400
-        message = f"repository: {{full_name}}: {repo_name}\nRepository name with undefined behavior"
+        message = f"repository: {{full_name}}: \"{repo_name}\"\nRepository name with undefined behavior"
 
         logger.debug(f"Response: {status_code} - {message}")
         return Response(content=message, status_code=status_code, media_type="text/plain")
@@ -81,7 +81,7 @@ async def write_root(
     # Check if event has a defined configuration for repo
     if headers.X_GitHub_Event not in repo_config.events:
         status_code = 400
-        message = f"X-GitHub-Event: {headers.X_GitHub_Event}\nEvent type with undefined behavior"
+        message = f"X-GitHub-Event: \"{headers.X_GitHub_Event}\"\nEvent type with undefined behavior"
 
         logger.debug(f"Response: {status_code} - {message}")
         return Response(content=message, status_code=status_code, media_type="text/plain")
