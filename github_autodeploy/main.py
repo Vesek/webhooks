@@ -63,7 +63,7 @@ async def write_root(
     payload: Payload # Repository info for searching in config
 ):
     '''
-    Post request handler for root, checks if everyhing is valid and
+    Post request handler for root, checks if everything is valid and
     '''
 
     repo_name = payload.repository.full_name
@@ -89,7 +89,7 @@ async def write_root(
     # Check if request signature matches config
     if not verify_signature(await request.body(), repo_config.secret, headers.X_Hub_Signature_256):
         status_code = 403
-        message="Hash does not match or invalid - violation reported"
+        message = "Hash does not match or invalid - violation reported"
 
         logger.warn(f"Response: {status_code} - {message}")
         return Response(content=message, status_code=status_code, media_type="text/plain")
@@ -97,7 +97,7 @@ async def write_root(
     script = repo_config.events[headers.X_GitHub_Event]
     uuid = headers.X_GitHub_Delivery
 
-
+    # Check if some (or all) refs match
     if script.refs is None or (payload.ref not in script.refs):
         status_code = 200
         message = f"Ref '{payload.ref}' not associated with '{headers.X_GitHub_Event}' event task"

@@ -25,6 +25,7 @@ Running as non-root is highly recommended.
 - [X] Add a log file
 - [X] Write a better README
 - [X] Implement a branch (ref) check
-- [ ] Add more comments
+- [X] Add more comments
+## One day
 - [ ] Rewrite task_handler to be multithreaded instead of async
 - [ ] (Is it really necessary?) Implement a timeout for repos to avoid spam
