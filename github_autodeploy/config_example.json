@@ -6,6 +6,7 @@
       "events": {
         "push": {
           "work_dir": "/srv/server",
+          "refs": ["refs/heads/dev", "refs/heads/main"],
           "run": "/home/user/test.sh"
         },
         "ping": {

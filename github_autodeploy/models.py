@@ -9,9 +9,11 @@ class Script(BaseModel):
 
     Attributes:
         run (FilePath): The script or command to be executed.
+        refs (list[str] | None): Which refs should trigger the script. Can be None (null) because some events may not have 'refs'
         work_dir (DirectoryPath | None): The working directory for the script.
     """
     run: FilePath
+    refs: list[str] | None = ["refs/heads/main"]
     work_dir: DirectoryPath | None = None
 
     @model_validator(mode='after')
@@ -31,6 +33,10 @@ class Config(BaseModel):
 # Payload model
 class PayloadRepository(BaseModel):
     full_name: str
+
+class Payload(BaseModel):
+    ref: str | None = None
+    repository: PayloadRepository
 
 # Header model
 class Headers(BaseModel):

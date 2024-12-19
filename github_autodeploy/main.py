@@ -1,6 +1,6 @@
 from typing import Annotated
-from fastapi import FastAPI, Response, Header, Request, Body
-from models import Config, PayloadRepository, Headers
+from fastapi import FastAPI, Response, Header, Request
+from models import Config, Payload, Headers
 from pydantic_core._pydantic_core import ValidationError
 from task_handler import TaskHandler, Task
 from asyncio import QueueFull
@@ -60,21 +60,23 @@ async def read_root():
 async def write_root(
     request: Request, # Raw request so it can be hashed tohether with the "secret",
     headers: Annotated[Headers, Header()], # Required headers sent by github
-    repository: Annotated[PayloadRepository, Body(embed=True)] # Repository info for searching in config
+    payload: Payload # Repository info for searching in config
 ):
     '''
     Post request handler for root, checks if everyhing is valid and
     '''
 
+    repo_name = payload.repository.full_name
+
     # Check if repository has a defined configuration
-    if repository.full_name not in config.repos:
+    if repo_name not in config.repos:
         status_code = 400
-        message = f"repository: {{full_name}}: {repository.full_name}\nRepository name with undefined behavior"
+        message = f"repository: {{full_name}}: {repo_name}\nRepository name with undefined behavior"
 
         logger.debug(f"Response: {status_code} - {message}")
         return Response(content=message, status_code=status_code, media_type="text/plain")
 
-    repo_config = config.repos[repository.full_name]
+    repo_config = config.repos[repo_name]
 
     # Check if event has a defined configuration for repo
     if headers.X_GitHub_Event not in repo_config.events:
@@ -92,15 +94,22 @@ async def write_root(
         logger.warn(f"Response: {status_code} - {message}")
         return Response(content=message, status_code=status_code, media_type="text/plain")
 
-    task = repo_config.events[headers.X_GitHub_Event]
+    script = repo_config.events[headers.X_GitHub_Event]
     uuid = headers.X_GitHub_Delivery
+
+    if payload.ref not in script.refs:
+        status_code = 200
+        message = f"Ref '{payload.ref}' not associated with '{headers.X_GitHub_Event}' event task"
+
+        logger.debug(f"Response: {status_code} - {message}")
+        return Response(content=message, status_code=status_code, media_type="text/plain")
 
     # Try to add the task to the queue
     try:
-        taskhandler.queue.put_nowait(Task(task, uuid))
+        taskhandler.queue.put_nowait(Task(script, uuid))
         log_level = logging.INFO
         status_code = 200
-        message = f"Task '{uuid}' added to queue"
+        message = f"Task {uuid} - {repo_name} - added to queue"
     except QueueFull:
         log_level = logging.ERROR
         status_code = 400
