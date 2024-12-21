@@ -44,7 +44,7 @@ logger.addHandler(rotating_handler)
 
 taskhandler = TaskHandler(logger.getChild("taskhandler"), config.max_queue_length)
 
-app = FastAPI(root_path="/autodeploy") # Root path isn't "/" because of use behind a reverse proxy
+app = FastAPI(root_path="/autodeploy", openapi_url=None) # Root path isn't "/" because of use behind a reverse proxy
 
 logger.info("Server started!")
 
